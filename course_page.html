@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>课程学习</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* 密码保护 */
+        #password-gate {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .password-box {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .password-box h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .password-input {
+            width: 200px;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .password-input:focus {
+            outline: none;
+            border-color: #4a90e2;
+        }
+
+        .password-btn {
+            padding: 12px 32px;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .password-btn:hover {
+            background: #357abd;
+        }
+
+        .password-error {
+            color: #e74c3c;
+            margin-top: 12px;
+            display: none;
+        }
+
+        /* 主内容 */
+        #main-content {
+            display: none;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .video-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .video-section h2 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 16px;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 */
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .video-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+        }
+
+        .video-placeholder-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .video-placeholder-text {
+            font-size: 14px;
+        }
+
+        /* 腾讯云点播播放器容器 */
+        #tcplayer-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+
+        .video-info {
+            margin-top: 16px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .video-info-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .video-info-meta {
+            font-size: 13px;
+            color: #888;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-size: 12px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+
+            .header, .video-section {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 密码保护 -->
+    <div id="password-gate">
+        <div class="password-box">
+            <h2>🔒 课程访问</h2>
+            <input type="password" id="password-input" class="password-input" placeholder="请输入访问密码" maxlength="20">
+            <br>
+            <button class="password-btn" onclick="checkPassword()">进入课程</button>
+            <div class="password-error" id="password-error">密码错误，请重试</div>
+        </div>
+    </div>
+
+    <!-- 主内容 -->
+    <div id="main-content">
+        <div class="container">
+            <div class="header">
+                <h1>📐 高中数学精品课程</h1>
+                <p>系统讲解 · 深入浅出 · 高效提分</p>
+            </div>
+
+            <div class="video-section">
+                <h2>🎬 课程视频</h2>
+
+                <div class="video-container">
+                    <!-- 视频占位（未配置时显示） -->
+                    <div class="video-placeholder" id="video-placeholder">
+                        <div class="video-placeholder-icon">🎥</div>
+                        <div class="video-placeholder-text">视频配置中，请稍候...</div>
+                    </div>
+
+                    <!-- 腾讯云点播播放器 -->
+                    <div id="tcplayer-container"></div>
+                </div>
+
+                <div class="video-info">
+                    <div class="video-info-title">第一讲：课程导学与基础梳理</div>
+                    <div class="video-info-meta">时长：待更新 · 难度：基础</div>
+                </div>
+            </div>
+
+            <div class="footer">
+                © 2024 高中数学精品课程 · 版权所有
+            </div>
+        </div>
+    </div>
+
+    <!-- 腾讯云点播播放器 SDK -->
+    <script src="https://web.sdk.qcloud.com/player/tcplayer/release/v4.8.0/tcplayer.min.js"></script>
+
+    <script>
+        // 密码验证
+        const CORRECT_PASSWORD = '1949101';
+
+        function checkPassword() {
+            const input = document.getElementById('password-input').value;
+            if (input === CORRECT_PASSWORD) {
+                document.getElementById('password-gate').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+            } else {
+                document.getElementById('password-error').style.display = 'block';
+                document.getElementById('password-input').value = '';
+            }
+        }
+
+        // 回车提交
+        document.getElementById('password-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+
+        // ============================================
+        // 视频配置区域
+        // ============================================
+
+        // 方式1：腾讯云点播（推荐）
+        // 开通地址：https://cloud.tencent.com/product/vod
+        // 上传视频后，获取 fileID 和 appID，填入下方
+
+        const TC_PLAYER_CONFIG = {
+            // 你的腾讯云 appID（必填）
+            appID: '你的appID',
+
+            // 视频 fileID（必填）
+            fileID: '你的fileID',
+
+            // 播放器签名（必填，用于防盗链）
+            // 生成方式：https://cloud.tencent.com/document/product/266/35230
+            psign: '你的psign'
+        };
+
+        // 初始化腾讯云点播播放器
+        function initTCPlayer() {
+            if (TC_PLAYER_CONFIG.appID === '你的appID') {
+                // 未配置，显示占位
+                return;
+            }
+
+            document.getElementById('video-placeholder').style.display = 'none';
+            document.getElementById('tcplayer-container').style.display = 'block';
+
+            const player = new TCPlayer('tcplayer-container', {
+                appID: TC_PLAYER_CONFIG.appID,
+                fileID: TC_PLAYER_CONFIG.fileID,
+                psign: TC_PLAYER_CONFIG.psign,
+                autoplay: false,
+                width: '100%',
+                height: '100%'
+            });
+        }
+
+        // 页面加载完成后初始化
+        window.onload = function() {
+            // 自动聚焦密码输入框
+            document.getElementById('password-input').focus();
+
+            // 如果已配置腾讯云，初始化播放器
+            initTCPlayer();
+        };
+
+        // ============================================
+        // 其他视频方案（备用）
+        // ============================================
+
+        // 方式2：直接MP4链接（简单但不安全）
+        // const MP4_URL = 'https://your-domain.com/video.mp4';
+        // function initMP4Player() {
+        //     document.getElementById('video-placeholder').style.display = 'none';
+        //     document.getElementById('tcplayer-container').innerHTML = 
+        //         '<video controls style="width:100%;height:100%;" src="' + MP4_URL + '"></video>';
+        // }
+
+        // 方式3：阿里云盘跳转（零成本）
+        // const ALIPAN_URL = 'https://www.aliyundrive.com/s/xxxx';
+        // function redirectToAliPan() {
+        //     window.open(ALIPAN_URL, '_blank');
+        // }
+    </script>
+</body>
+</html>
